@@ -118,7 +118,7 @@ python src/db_ingest.py
 python src/main_pipeline.py
 
 ## 📊 Repository Structure
-```text
+```
 olist-intelligence-bridge/
 ├── data/                   # Raw CSV files (Olist Dataset)
 ├── sql/
