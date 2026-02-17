@@ -118,7 +118,7 @@ python src/db_ingest.py
 python src/main_pipeline.py
 
 ## 📊 Repository Structure
-
+```text
 olist-intelligence-bridge/
 ├── data/                   # Raw CSV files (Olist Dataset)
 ├── sql/
@@ -133,8 +133,8 @@ olist-intelligence-bridge/
 ├── requirements.txt
 ├── .env
 └── README.md
-
-##📈 Results
+```
+## 📈 Results
 ### Segmentation: Identified 3 distinct customer personas (Platinum, Gold, Silver).
 
 ### Automation: Reduced manual segmentation time from hours to seconds.
