@@ -117,7 +117,7 @@ python src/db_ingest.py
 #### Step 2: Run Analysis & Update CRM
 python src/main_pipeline.py
 
-##📊 Repository Structure
+## 📊 Repository Structure
 
 olist-intelligence-bridge/
 ├── data/                   # Raw CSV files (Olist Dataset)
