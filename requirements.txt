@@ -1,0 +1,11 @@
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+psycopg2-binary  # For PostgreSQL connection
+sqlalchemy
+python-dotenv    # To hide your API keys
+requests         # For HubSpot API
+tqdm             # For progress bars
+jupyter          # For notebooks
