@@ -91,11 +91,11 @@ The model assigns a Tier (Cluster) and a Next Best Action using priority-based r
 
 
 ## 📊 Key Results
--- The "One-and-Done" Problem: Discovered that 96% of customers purchase only once.
+- **The "One-and-Done" Problem:** Discovered that 96% of customers purchase only once.
 
--- The "Platinum" Tier: Only ~3% of users are repeat high-value buyers, but they drive significant revenue.
+- **The "Platinum" Tier:** Only ~3% of users are repeat high-value buyers, but they drive significant revenue.
 
--- Risk Detection: Identified 216 Platinum Customers with low sentiment scores (1-2 stars) who were at high risk of churning and flagged them for immediate human intervention.
+- **Risk Detection:** Identified 216 Platinum Customers with low sentiment scores (1-2 stars) who were at high risk of churning and flagged them for immediate human intervention.
 
 ## 🚀 How to Run
 
@@ -124,18 +124,20 @@ pip install -r requirements.txt
 
 ### Setup Environment Variables
 
--- Open src/hubspot_connector.py and add your Token (or use a .env file):
+- Open src/hubspot_connector.py and add your Token (or use a .env file):
 ```bash
 HUBSPOT_ACCESS_TOKEN = 'your_hubspot_token_here'
 ```
 ### Run the Pipeline
--- Step 1: Data Cleaning & ETL
-```bash python src/data_loader.py
+- Step 1: Data Cleaning & ETL
+```bash 
+python src/data_loader.py
 ```
 Output: Generates data/processed/clean_data.csv
 
 --Step 2: Sync to CRM
-```bash python src/hubspot_connector.py
+```bash 
+python src/hubspot_connector.py
 ```
 Output: Batches 1000 contacts to HubSpot with "Next Best Action" tags.
 
@@ -155,3 +157,4 @@ olist-intelligence-bridge/
 ├── requirements.txt        # Dependencies
 └── README.md               # Documentation
 ```
+
