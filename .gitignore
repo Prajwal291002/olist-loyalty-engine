@@ -1,0 +1,11 @@
+# data files
+data/
+*.csv
+*.parquet
+*.xlsx
+
+# system files
+__pycache__/
+.DS_Store
+.env
+.ipynb_checkpoints/
