@@ -1,23 +1,46 @@
 import pandas as pd
 import os
+from sqlalchemy import create_engine
+from dotenv import load_dotenv
 
-def load_and_clean_data(base_path='data/raw/'):
+# Load environment variables from a .env file located in the root directory
+load_dotenv()
+
+def get_db_connection():
     """
-    Loads Olist datasets, cleans dates, filters ghost orders,
+    Creates and returns a SQLAlchemy engine connected to PostgreSQL.
+    Pulls credentials from environment variables.
+    """
+    db_host = os.getenv("DB_HOST", "localhost")
+    db_port = os.getenv("DB_PORT", "5433")
+    db_name = os.getenv("DB_NAME", "biba")
+    db_user = os.getenv("DB_USER", "postgres")
+    db_pass = os.getenv("DB_PASS")
+
+    # Create the connection string
+    conn_str = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
+    return create_engine(conn_str)
+
+def load_and_clean_data():
+    """
+    Loads Olist datasets via PostgreSQL, cleans dates, filters ghost orders,
     and merges them into a single 'Golden Record' dataframe.
-    Includes Reviews (Sentiment) and Products (Strategy).
     """
-    print("Starting Data Ingestion...")
+    print("🚀 Starting Data Ingestion from PostgreSQL...")
 
-    # 1. Load Data
-    orders = pd.read_csv(os.path.join(base_path, 'olist_orders_dataset.csv'))
-    items = pd.read_csv(os.path.join(base_path, 'olist_order_items_dataset.csv'))
-    customers = pd.read_csv(os.path.join(base_path, 'olist_customers_dataset.csv'))
-    reviews = pd.read_csv(os.path.join(base_path, 'olist_order_reviews_dataset.csv'))
-    products = pd.read_csv(os.path.join(base_path, 'olist_products_dataset.csv'))
+    engine = get_db_connection()
+
+    # 1. Load Data from Database
+    # NOTE: Ensure these table names match exactly how you named them in PostgreSQL
+    print("📥 Fetching tables from database...")
+    orders = pd.read_sql("SELECT * FROM olist_orders_dataset", engine)
+    items = pd.read_sql("SELECT * FROM olist_order_items_dataset", engine)
+    customers = pd.read_sql("SELECT * FROM olist_customers_dataset", engine)
+    reviews = pd.read_sql("SELECT * FROM olist_order_reviews_dataset", engine)
+    products = pd.read_sql("SELECT * FROM olist_products_dataset", engine)
 
     # 2. Fix Date Types
-    print("timeline fixing...")
+    print("🕒 Timeline fixing...")
     date_cols = ['order_purchase_timestamp', 'order_approved_at', 
                  'order_delivered_carrier_date', 'order_delivered_customer_date', 
                  'order_estimated_delivery_date']
@@ -28,48 +51,47 @@ def load_and_clean_data(base_path='data/raw/'):
     # 3. Filter "Ghost Orders" (Undelivered)
     initial_count = len(orders)
     orders = orders[orders['order_status'] == 'delivered']
-    print(f"Filtered out {initial_count - len(orders)} non-delivered orders.")
+    print(f"👻 Filtered out {initial_count - len(orders)} non-delivered orders.")
 
     # 4. Enrich Items with Category
-    # Join Items + Products to get 'product_category_name'
     items_enriched = items.merge(products[['product_id', 'product_category_name']], on='product_id', how='left')
 
     # 5. Aggregate Items (Order Level)
-    # We sum price, but we also want the "Main Category" of the order.
-    # Logic: We take the category of the first item in the order for simplicity.
     order_items_agg = items_enriched.groupby('order_id').agg({
         'price': 'sum',
         'freight_value': 'sum',
-        'product_category_name': 'first'  # Takes the first category found in the basket
+        'product_category_name': 'first'  
     }).reset_index()
     
     order_items_agg['total_order_value'] = order_items_agg['price'] + order_items_agg['freight_value']
 
     # 6. Prepare Reviews
-    # Some orders have multiple reviews. We take the average score.
     reviews_agg = reviews.groupby('order_id')['review_score'].mean().reset_index()
 
     # 7. The Great Merge (Joining 5 Tables)
-    # Orders + Items (Money & Category)
+    print("🔗 Merging datasets...")
     merged_df = orders.merge(order_items_agg, on='order_id', how='left')
-    
-    # + Reviews (Sentiment)
     merged_df = merged_df.merge(reviews_agg, on='order_id', how='left')
-    
-    # + Customers (Identity)
     final_df = merged_df.merge(customers, on='customer_id', how='inner')
 
     # 8. Clean Up
-    # Fill missing review scores with the average (approx 4.0) or a specific flag (-1)
-    # Here we fill with 0 to indicate "Unknown/No Review"
     final_df['review_score'] = final_df['review_score'].fillna(0)
 
-    print(f"Final Data Shape: {final_df.shape}")
+    print(f"✅ Final Data Shape: {final_df.shape}")
     print(f"   Unique Customers: {final_df['customer_unique_id'].nunique()}")
     
     return final_df
 
 if __name__ == "__main__":
     df = load_and_clean_data()
-    df.to_csv('data/processed/clean_data.csv', index=False)
-    print("Saved enriched data to 'data/processed/clean_data.csv'")
+    
+    # Robust Pathing: Ensure it saves to the correct folder regardless of where the script is run from
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(current_dir)
+    output_path = os.path.join(project_root, 'data', 'processed', 'clean_data.csv')
+    
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    
+    df.to_csv(output_path, index=False)
+    print(f"💾 Saved enriched data to '{output_path}'")
