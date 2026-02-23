@@ -38,15 +38,15 @@ graph LR
     style G fill:#ff9,stroke:#333,stroke-width:2px
 ```
 ## 🛠️ Tech Stack
--- Language: Python 3.9+ (pandas, numpy, requests, scikit-learn)
+- Language: Python 3.9+ (pandas, numpy, requests, scikit-learn)
 
--- Database: PostgreSQL (Relational Data Warehouse)
+- Database: PostgreSQL (Relational Data Warehouse)
 
--- Machine Learning: K-Means Clustering (Unsupervised Learning) + Log Transformation
+- Machine Learning: K-Means Clustering (Unsupervised Learning) + Log Transformation
 
--- Operational Tool: HubSpot CRM (API Batch Upsert)
+- Operational Tool: HubSpot CRM (API Batch Upsert)
 
--- Visualization: Matplotlib, Seaborn (EDA), Power BI (Dashboarding)
+- Visualization: Matplotlib, Seaborn (EDA), Power BI (Dashboarding)
 
 ## ⚙️ Methodology & Workflow
 
